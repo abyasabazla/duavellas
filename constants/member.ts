@@ -87,7 +87,7 @@ export const MEMBERS = [
         name: 'Ahmad Haikal Syauqi',
         quote: 'Tidak seperti di brosur',
         instagram: '@syyaauqii',
-        images: '/images/membern/Ahmad Haikal Syauqi.png'
+        images: '/images/membern/AHMAD HAIKAL SYAUQI.png'
     },
     {
         name: 'AHMAD NAUFAL',
@@ -201,7 +201,7 @@ export const MEMBERS = [
         name: 'Fathi Athallah',
         quote: 'sudah malam atau sudah lulus',
         instagram: '@f._athallah',
-        images: '/images/membern/Fathi Athallah.png'
+        images: '/images/membern/FATHI ATHALLAH.png'
     },
     {
         name: 'FATTHAN RIZIEQ ACHMAD',
@@ -339,7 +339,7 @@ export const MEMBERS = [
         name: 'Hanif Wafi Chandra',
         quote: 'Sampai bertemu di kesuksesan kita bersama💋💦',
         instagram: '@hanifchndra',
-        images: '/images/membern/Hanif Wafi Chandra.png'
+        images: '/images/membern/HANIF WAFI CHANDRA.png'
     },
     {
         name: 'MUHAMAD GHAFTAN ARIF PURNOMO',
@@ -423,7 +423,7 @@ export const MEMBERS = [
         name: 'Mufthi Ikhwaniko',
         quote: 'justice may be blind but i can see in the dark',
         instagram: '@mufthxniko_',
-        images: '/images/membern/Mufthi Ikhwaniko.png'
+        images: '/images/membern/MUFTHI IKHWANIKO.png'
     },
     {
         name: 'MUHAMMAD ABDULLAH ALFAUZAN',
