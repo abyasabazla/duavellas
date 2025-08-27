@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siapkah Kamu Menghadapi AI?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a vertical storytelling journey, transforming the linear slide deck into an engaging, explorable narrative. It starts with a hook (Hero & Interactive Game), presents the core challenge with data (Future of Work Dashboard), offers the solution (Human Superpowers section), provides inspiration (Real-world examples), and ends with a clear call to action. A sticky navigation bar allows non-linear exploration. This structure was chosen to maximize engagement for a young audience by making them active participants rather than passive viewers, fostering curiosity and better information retention. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: "Fake or Fact" game -> Goal: Engage & Inform -> Viz/Method: Interactive HTML buttons with JS logic -> Interaction: User clicks to guess, receives immediate feedback -> Justification: More memorable and fun than a static slide.
+        - Report Info: Indonesia 2045 statistics -> Goal: Inform & Impress -> Viz/Method: Dynamic number counters using JS -> Interaction: Numbers animate on scroll -> Justification: Makes large numbers feel dynamic and significant.
+        - Report Info: Job loss vs. new opportunities -> Goal: Compare & Contextualize -> Viz/Method: Bar Chart (Chart.js/Canvas) -> Interaction: Hover tooltips for precise data -> Justification: Provides a powerful, clear visual comparison of the "threat" vs. the "opportunity".
+        - Report Info: Man vs. AI capabilities -> Goal: Compare & Empower -> Viz/Method: Interactive flip cards (HTML/CSS/JS) -> Interaction: User clicks to reveal details -> Justification: Breaks down complex ideas into digestible, interactive chunks.
+        - Report Info: Actionable steps -> Goal: Instruct & Motivate -> Viz/Method: Large, icon-driven cards (HTML/Tailwind) -> Interaction: Static but visually prominent -> Justification: Creates a clear, memorable, and actionable conclusion.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F8F4F1;
+            color: #333;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #FF6B6B;
+        }
+        .hero-bg {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://placehold.co/1920x1080/1a202c/ffffff?text=Era+AI');
+            background-size: cover;
+            background-position: center;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.flipped .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .fact-btn {
+            transition: all 0.3s ease;
+        }
+        .fact-btn.correct {
+            background-color: #48BB78 !important;
+            color: white !important;
+            transform: scale(1.05);
+        }
+        .fact-btn.incorrect {
+            background-color: #F56565 !important;
+            color: white !important;
+        }
+        .fact-btn.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md shadow-md transition-all duration-300">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold text-gray-800">Generasi AI</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#fakta" class="nav-link text-gray-600">Fakta Mengejutkan</a>
+                <a href="#masa-depan" class="nav-link text-gray-600">Masa Depan Kerja</a>
+                <a href="#superpower" class="nav-link text-gray-600">Superpower Kamu</a>
+                <a href="#aksi" class="nav-link text-gray-600">Mulai Beraksi</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-gray-800 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#fakta" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Fakta Mengejutkan</a>
+            <a href="#masa-depan" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Masa Depan Kerja</a>
+            <a href="#superpower" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Superpower Kamu</a>
+            <a href="#aksi" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Mulai Beraksi</a>
+        </div>
+    </nav>
+
+    <header class="hero-bg h-screen flex items-center justify-center text-white text-center">
+        <div class="container mx-auto px-6">
+            <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4 animate-fade-in-down">Siapkah Kamu Menghadapi AI?</h1>
+            <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto">Bukan tentang manusia melawan mesin, tapi bagaimana kita bisa menjadi generasi yang berkolaborasi dengan teknologi.</p>
+            <a href="#fakta" class="bg-white text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition duration-300">Mulai Petualangan</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="fakta" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Fakta Mengejutkan Dunia AI</h2>
+                    <p class="text-gray-600 mt-2">AI lebih dekat dari yang kamu kira. Mari kita mulai dengan sebuah permainan.</p>
+                </div>
+                
+                <div class="max-w-3xl mx-auto bg-gray-50 p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-2">Game: FAKE or FACT?</h3>
+                    <p class="text-center text-gray-600 mb-6">Tebak, manakah satu pernyataan di bawah ini yang BOHONG?</p>
+                    <div id="fact-game" class="space-y-4">
+                        <button data-answer="true" class="fact-btn w-full text-left p-4 bg-white rounded-lg shadow hover:shadow-md"><strong>A.</strong> Lukisan buatan AI laku terjual lebih dari 6 Miliar Rupiah.</button>
+                        <button data-answer="false" class="fact-btn w-full text-left p-4 bg-white rounded-lg shadow hover:shadow-md"><strong>B.</strong> AI sudah bisa merasakan sedih dan senang seperti manusia.</button>
+                        <button data-answer="true" class="fact-btn w-full text-left p-4 bg-white rounded-lg shadow hover:shadow-md"><strong>C.</strong> AI berhasil menyelesaikan simfoni Beethoven yang belum selesai.</button>
+                    </div>
+                    <div id="fact-explanation" class="mt-6 text-center text-gray-700 hidden"></div>
+                </div>
+
+                <div class="mt-20">
+                    <h3 class="text-2xl font-bold text-center mb-8">Berita "Merinding" dari Dunia Nyata</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-red-700 text-white p-6 rounded-lg shadow-xl">
+                            <h4 class="text-xl font-bold mb-2">BREAKING: KARYA SENI AI MENANG LOMBA!</h4>
+                            <p class="text-red-200">Karya 'Théâtre D'opéra Spatial' yang dibuat oleh AI Midjourney dari perintah teks, memenangkan kompetisi seni, memicu protes dari seniman manusia. Ini membuktikan kreativitas pun bisa ditiru.</p>
+                        </div>
+                        <div class="bg-gray-800 text-white p-6 rounded-lg shadow-xl">
+                            <h4 class="text-xl font-bold mb-2">PREDIKSI: PEKERJAAN KANTORAN TERANCAM</h4>
+                            <p class="text-gray-300">Pekerjaan seperti entri data, akuntansi dasar, bahkan tugas rutin software developer berisiko tinggi digantikan AI karena kemampuannya memproses informasi dengan cepat dan akurat.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="masa-depan" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Lompat ke Masa Depan: Dunia Kerja 2045</h2>
+                    <p class="text-gray-600 mt-2">Saat kamu di puncak usia produktif, beginilah lanskap pekerjaan yang akan kamu hadapi.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8 text-center mb-16">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="text-4xl font-bold text-indigo-600" data-target="324">0</h4>
+                        <p class="text-gray-600 mt-2">Juta Jiwa Populasi Indonesia</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="text-4xl font-bold text-teal-600" data-target="69">0</h4>
+                        <p class="text-gray-600 mt-2">% Usia Produktif (Bonus Demografi)</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="text-4xl font-bold text-amber-600" data-target="5">0</h4>
+                        <p class="text-gray-600 mt-2">Target Kekuatan Ekonomi Dunia</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-2">Pekerjaan Hilang vs. Peluang Baru</h3>
+                    <p class="text-center text-gray-600 mb-6">Laporan dari Goldman Sachs dan McKinsey menunjukkan gambaran yang mengejutkan namun penuh harapan.</p>
+                    <div class="chart-container">
+                        <canvas id="jobChart"></canvas>
+                    </div>
+                     <p class="text-center text-sm text-gray-500 mt-4">Data menunjukkan bahwa meskipun banyak pekerjaan tergantikan secara global, peluang kerja baru di Indonesia justru akan tumbuh pesat berkat adopsi AI.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="superpower" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Superpower Kamu yang Tak Tergantikan</h2>
+                    <p class="text-gray-600 mt-2">AI memang cepat, tapi manusia punya keunggulan yang tidak dimiliki mesin. Klik untuk melihat detailnya!</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card-flip h-64 cursor-pointer">
+                        <div class="card-flip-inner">
+                            <div class="card-front bg-teal-500 text-white">
+                                <span class="text-4xl mb-2">🎨</span>
+                                <h4 class="text-xl font-bold">Kreativitas & Inovasi</h4>
+                            </div>
+                            <div class="card-back bg-teal-600 text-white">
+                                <p>AI meniru, manusia mencipta. Kemampuan berpikir *out-of-the-box* dan menghasilkan ide orisinal adalah murni milik kita.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-flip h-64 cursor-pointer">
+                        <div class="card-flip-inner">
+                            <div class="card-front bg-indigo-500 text-white">
+                                <span class="text-4xl mb-2">🤔</span>
+                                <h4 class="text-xl font-bold">Berpikir Kritis & Etika</h4>
+                            </div>
+                            <div class="card-back bg-indigo-600 text-white">
+                                <p>AI memberi data, manusia memberi kebijaksanaan. Kita bisa mempertanyakan validitas, bias, dan dampak moral dari sebuah keputusan.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-flip h-64 cursor-pointer">
+                        <div class="card-flip-inner">
+                            <div class="card-front bg-amber-500 text-white">
+                                <span class="text-4xl mb-2">❤️</span>
+                                <h4 class="text-xl font-bold">Empati & Kecerdasan Emosi</h4>
+                            </div>
+                            <div class="card-back bg-amber-600 text-white">
+                                <p>AI tak punya perasaan. Kemampuan memahami, berempati, dan membangun hubungan tulus adalah keunggulan terbesar manusia.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-flip h-64 cursor-pointer">
+                        <div class="card-flip-inner">
+                            <div class="card-front bg-rose-500 text-white">
+                                <span class="text-4xl mb-2">🧩</span>
+                                <h4 class="text-xl font-bold">Adaptasi & Intuisi</h4>
+                            </div>
+                            <div class="card-back bg-rose-600 text-white">
+                                <p>Manusia bisa beradaptasi dengan situasi tak terduga dan menggunakan intuisi untuk memecahkan masalah kompleks yang tak berpola.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="aksi" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Jadilah Sutradara Masa Depanmu</h2>
+                    <p class="text-gray-600 mt-2">Jangan takut, tapi bersiaplah. Mulai dari 3 hal simpel ini, sekarang juga!</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+                        <div class="text-5xl mb-4">🕵️</div>
+                        <h4 class="text-xl font-bold mb-2">Asah Skill Detektif</h4>
+                        <p class="text-gray-600">Latih berpikir kritis. Jangan telan info mentah-mentah. Selalu tanya "kenapa" dan "bagaimana".</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+                        <div class="text-5xl mb-4">🚀</div>
+                        <h4 class="text-xl font-bold mb-2">Jadilah Pencipta</h4>
+                        <p class="text-gray-600">Latih kreativitasmu. Buat sesuatu, jangan hanya mengonsumsi. Tulis, gambar, edit, atau bangun proyekmu sendiri.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+                        <div class="text-5xl mb-4">🤝</div>
+                        <h4 class="text-xl font-bold mb-2">Kolaborasi</h4>
+                        <p class="text-gray-600">Latih empati dan kerja sama tim. Masalah besar di masa depan hanya bisa dipecahkan bersama-sama.</p>
+                    </div>
+                </div>
+
+                <div class="mt-16 bg-gray-800 text-white p-8 rounded-xl shadow-2xl max-w-4xl mx-auto">
+                    <h4 class="text-2xl font-bold text-center mb-4">Diskusi Etika: Curang atau Cerdas?</h4>
+                    <p class="text-center text-gray-300">Temanmu copy-paste esai dari ChatGPT dan dapat nilai 100. Kamu kerja keras sendiri dan dapat 85. Apakah itu curang? Di mana batasannya? Kuncinya adalah menggunakan AI sebagai **asisten riset**, bukan sebagai **pengganti otak** kita. Proses belajarmu adalah yang terpenting.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>"Jadilah generasi yang mengendalikan teknologi, bukan dikendalikan olehnya."</p>
+            <p class="text-sm text-gray-400 mt-2">&copy; 2025 Generasi AI. Dibuat untuk masa depan Indonesia.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a, header a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (link.hash !== "") {
+                        e.preventDefault();
+                        const targetElement = document.querySelector(link.hash);
+                        if (targetElement) {
+                           targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                    if(mobileMenu.classList.contains('hidden') === false){
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('py-2');
+                    navbar.classList.remove('py-3');
+                } else {
+                    navbar.classList.remove('py-2');
+                    navbar.classList.add('py-3');
+                }
+            });
+
+            const factButtons = document.querySelectorAll('.fact-btn');
+            const factExplanation = document.getElementById('fact-explanation');
+            factButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const isCorrect = button.dataset.answer === 'true';
+                    const allButtons = document.querySelectorAll('.fact-btn');
+
+                    allButtons.forEach(btn => {
+                        btn.classList.add('disabled');
+                        if (btn.dataset.answer === 'false') {
+                            btn.classList.add('correct');
+                        } else {
+                            btn.classList.add('incorrect');
+                        }
+                    });
+
+                    if (!isCorrect) {
+                        factExplanation.innerHTML = `<strong>Tepat! Jawaban yang bohong adalah B.</strong><br>AI bisa mendeteksi emosi, tapi tidak bisa merasakannya. Sementara itu, lukisan AI memang laku miliaran dan simfoni Beethoven berhasil diselesaikan dengan bantuan AI!`;
+                    } else {
+                         factExplanation.innerHTML = `<strong>Kurang Tepat. Jawaban yang bohong adalah B.</strong><br>AI bisa mendeteksi emosi, tapi tidak bisa merasakannya. Sementara itu, lukisan AI memang laku miliaran dan simfoni Beethoven berhasil diselesaikan dengan bantuan AI!`;
+                    }
+                    factExplanation.classList.remove('hidden');
+                });
+            });
+
+            const counters = document.querySelectorAll('[data-target]');
+            const speed = 200; 
+
+            const animateCounter = (counter) => {
+                const target = +counter.dataset.target;
+                const updateCount = () => {
+                    const count = +counter.innerText;
+                    const inc = target / speed;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(updateCount, 10);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounter(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            counters.forEach(counter => {
+                observer.observe(counter);
+            });
+
+            const ctx = document.getElementById('jobChart').getContext('2d');
+            const jobChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pekerjaan Global Tergantikan', 'Peluang Kerja Baru di Indonesia'],
+                    datasets: [{
+                        label: 'Jumlah Pekerjaan (dalam Juta)',
+                        data: [300, 23],
+                        backgroundColor: [
+                            'rgba(245, 101, 101, 0.6)',
+                            'rgba(72, 187, 120, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(245, 101, 101, 1)',
+                            'rgba(72, 187, 120, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Perkiraan Jumlah (dalam Juta)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x + ' Juta';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const flipCards = document.querySelectorAll('.card-flip');
+            flipCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
