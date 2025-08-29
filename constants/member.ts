@@ -422,7 +422,7 @@ export const MEMBERS = [
     {
         name: 'Mufthi Ikhwaniko',
         quote: 'justice may be blind but i can see in the dark',
-        instagram: '@mufthxniko_',
+        instagram: '@mufthikhwaniko',
         images: '/images/membern/MUFTHI IKHWANIKO.png'
     },
     {
