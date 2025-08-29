@@ -266,7 +266,7 @@ export const MEMBERS = [
     {
         name: 'MUHAMMAD RANGGA DWI ANDHIKA',
         quote: 'be useless, so nobody can use you.',
-        instagram: '@rnggaddw',
+        instagram: '@rnggaddwi',
         images: '/images/membern/MUHAMMAD RANGGA DWI ANDHIKA.png'
     },
     {
